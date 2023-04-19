@@ -34,9 +34,8 @@ async def scrapping(bot, message):
         url = str(message.text)
         request = requests.get(url)
         await txt.edit(text=f"Getting Raw Data from {url}", disable_web_page_preview=True)
-        file_write = open(f'RawData-{message.chat.username}.txt', 'a+')
-        file_write.write(f"{request.content}")  # Writing Raw Content to Txt file
-        file_write.close()
+        with open(f'RawData-{message.chat.username}.txt', 'a+') as file_write:
+            file_write.write(f"{request.content}")  # Writing Raw Content to Txt file
         await message.reply_document(f"RawData-{message.chat.username}.txt", caption="©@BugHunterBots", quote=True)
         os.remove(f"RawData-{message.chat.username}.txt")
         await txt.delete()
@@ -48,10 +47,9 @@ async def scrapping(bot, message):
     try:
         txt = await message.reply_text(text=f"Getting HTML code from {url}", disable_web_page_preview=True, quote=True)
         soup = BeautifulSoup(request.content, 'html5lib')  # Extracting Html code in Tree Format
-        file_write = open(f'HtmlData-{message.chat.username}.txt', 'a+')
-        soup.data = soup.prettify()  # parsing HTML
-        file_write.write(f"{soup.data}")  # writing data to txt
-        file_write.close()
+        with open(f'HtmlData-{message.chat.username}.txt', 'a+') as file_write:
+            soup.data = soup.prettify()  # parsing HTML
+            file_write.write(f"{soup.data}")  # writing data to txt
         await message.reply_document(f"HtmlData-{message.chat.username}.txt", caption="©@BugHunterBots", quote=True)
         os.remove(f"HtmlData-{message.chat.username}.txt")
         await txt.delete()
@@ -61,11 +59,10 @@ async def scrapping(bot, message):
         return
     try:
         txt = await message.reply_text(f"Getting all Links from {url}", disable_web_page_preview=True, quote=True)
-        file_write = open(f'AllLinks-{message.chat.username}.txt', 'a+')
-        for link in soup.find_all('a'):  # getting all <a> tags in Html
-            links = link.get('href')  # Extracting Href value of <a>
-            file_write.write(f"{links}\n\n")  # writing links to txt file
-        file_write.close()
+        with open(f'AllLinks-{message.chat.username}.txt', 'a+') as file_write:
+            for link in soup.find_all('a'):  # getting all <a> tags in Html
+                links = link.get('href')  # Extracting Href value of <a>
+                file_write.write(f"{links}\n\n")  # writing links to txt file
         await message.reply_document(
             f"AllLinks-{message.chat.username}.txt",
             caption="©@BugHunterBots"
@@ -82,13 +79,11 @@ async def scrapping(bot, message):
             disable_web_page_preview=True,
             quote=True
         )
-        file_write = open(f'AllParagraph-{message.chat.username}.txt', 'a+')
-        paragraph = ""
-        for para in soup.find_all('p'):  # Extracting all <p> tags
-            paragraph = para.get_text()  # Getting Text from Paragraphs
-            file_write.write(f"{paragraph}\n\n")  # writing to a file
-        file_write.close()
-        
+        with open(f'AllParagraph-{message.chat.username}.txt', 'a+') as file_write:
+            paragraph = ""
+            for para in soup.find_all('p'):  # Extracting all <p> tags
+                paragraph = para.get_text()  # Getting Text from Paragraphs
+                file_write.write(f"{paragraph}\n\n")  # writing to a file
         await txt.delete()
         await message.reply_document(
             f"AllParagraph-{message.chat.username}.txt",
@@ -97,7 +92,11 @@ async def scrapping(bot, message):
         )
         os.remove(f"AllParagraph-{message.chat.username}.txt")
     except Exception as error:
-        await message.reply_text(text=f"No Paragraphs Found!!", disable_web_page_preview=True, quote=True)
+        await message.reply_text(
+            text="No Paragraphs Found!!",
+            disable_web_page_preview=True,
+            quote=True,
+        )
         await txt.delete()
         return
 
